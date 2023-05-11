@@ -40,4 +40,26 @@ b = (x for x in range(1, 10))
 print(b)  # 元组推导式返回的结果是一个生成器对象
 print(tuple(b))
 
+print('-' * 10 + '推导式嵌套' + '-' * 10)
 
+# 推导式嵌套
+
+matrix = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12]
+]
+
+result = []
+
+# debug
+for i in range(4):
+    ll = []
+    for row in matrix:
+        item = row[i]
+        ll.append(item)
+    result.append(ll)
+# 这个列表推导式的结果如果看不懂，就去debug上面的for循环，结果和原理都是一样的
+result2 = [[row[i] for row in matrix] for i in range(4)]
+
+print(result, result2)
