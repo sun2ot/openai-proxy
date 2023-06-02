@@ -27,10 +27,15 @@ def softmax(a):
 
 
 # 优化的softmax函数
-def opt_softmax(a):
-    exp_a = np.exp(a - np.max(a))
-    sum_exp_a = np.sum(exp_a)
-    return exp_a/sum_exp_a
+def opt_softmax(x):
+    if x.ndim == 2:
+        x = x.T
+        x = x - np.max(x, axis=0)
+        y = np.exp(x) / np.sum(np.exp(x), axis=0)
+        return y.T
+
+    x = x - np.max(x) # 溢出对策
+    return np.exp(x) / np.sum(np.exp(x))
 
 
 def Softmax(x):
