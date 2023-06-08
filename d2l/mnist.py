@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import os
 from PIL import Image
-from NeuralNetwork import process
+from d2l.NeuralNetwork import process
 import time
 
 # 记录开始时间
@@ -144,23 +144,23 @@ def init_network():
 
 
 
-# 分类测试
-(x_train2, t_train2), (x_test2, t_test2) = load_mnist()
-network = init_network()
-accuracy_cnt = 0  # 精度
-for i in range(len(x_test2)):
-    y = process(network, x_test2[i])
-    p = np.argmax(y)  # 获取概率最高的元素的索引(0,1,2...)
-    if p == t_test2[i]:
-        accuracy_cnt += 1  # 预测正确的图片数
-
-print("Accuracy:" + str(float(accuracy_cnt) / len(x_test2)))
-
-# 记录结束时间
-end_time = time.time()
-# 计算代码执行时间
-duration = end_time - start_time
-print("执行时间为：{:.2f}秒".format(duration))
+# # 分类测试
+# (x_train2, t_train2), (x_test2, t_test2) = load_mnist()
+# network = init_network()
+# accuracy_cnt = 0  # 精度
+# for i in range(len(x_test2)):
+#     y = process(network, x_test2[i])
+#     p = np.argmax(y)  # 获取概率最高的元素的索引(0,1,2...)
+#     if p == t_test2[i]:
+#         accuracy_cnt += 1  # 预测正确的图片数
+#
+# print("Accuracy:" + str(float(accuracy_cnt) / len(x_test2)))
+#
+# # 记录结束时间
+# end_time = time.time()
+# # 计算代码执行时间
+# duration = end_time - start_time
+# print("执行时间为：{:.2f}秒".format(duration))
 
 
 # # 批处理
