@@ -136,15 +136,15 @@ for i in range(iters_num):
         print("train acc, test acc | " + str(train_acc) + ", " + str(test_acc))
 
 # 绘制图形
-markers = {'train': 'o', 'test': 's'}
-x = np.arange(len(train_acc_list))
-plt.plot(x, train_acc_list, label='train acc')
-plt.plot(x, test_acc_list, label='test acc', linestyle='--')
-plt.xlabel("epochs")
-plt.ylabel("accuracy")
-plt.ylim(0, 1.0)  # y轴范围
-plt.legend(loc='lower right')  # 图例
-plt.show()
+# markers = {'train': 'o', 'test': 's'}
+# x = np.arange(len(train_acc_list))
+# plt.plot(x, train_acc_list, label='train acc')
+# plt.plot(x, test_acc_list, label='test acc', linestyle='--')
+# plt.xlabel("epochs")
+# plt.ylabel("accuracy")
+# plt.ylim(0, 1.0)  # y轴范围
+# plt.legend(loc='lower right')  # 图例
+# plt.show()
 # plt.xlabel("iteration")
 # plt.ylabel("loss")
 # plt.xlim(0, 10000)
