@@ -91,8 +91,13 @@ class Sigmoid:
 # 仿射变换层
 class Affine:
     def __init__(self, W, b):
-        self.W = W  # 权重
-        self.b = b  # 偏置
+        """
+        初始化仿射变换层
+        :param W: 权重
+        :param b: 偏置
+        """
+        self.W = W
+        self.b = b
 
         self.x = None
         self.original_x_shape = None
@@ -163,5 +168,124 @@ class SoftmaxWithLoss:
             # 其余位假想减0，等价于不变
             dx[np.arange(batch_size), self.t] -= 1
             dx = dx / batch_size
+
+        return dx
+
+
+class Dropout:
+    """
+    http://arxiv.org/abs/1207.0580
+    """
+
+    def __init__(self, dropout_ratio=0.5):
+        self.dropout_ratio = dropout_ratio
+        self.mask = None
+
+    def forward(self, x, train_flg=True):
+        if train_flg:
+            # 生成的同型数组中，大于ratio的置为True，否则为False
+            self.mask = np.random.rand(*x.shape) > self.dropout_ratio
+            # 与x相乘后，为True的保留，为False的被置为0，达到drop节点的作用
+            return x * self.mask
+        else:
+            return x * (1.0 - self.dropout_ratio)
+
+    def backward(self, dout):
+        # 反向传播时，行为与ReLU相同，即
+        # 正向传播时传递了信号的神经元，反向传播时按原样传递信号
+        # 正向传播时没有传递信号的，反向传播时信号将停在那里
+        return dout * self.mask
+
+
+class BatchNormalization:
+    """
+    http://arxiv.org/abs/1502.03167
+    """
+
+    def __init__(self, gamma, beta, momentum=0.9, running_mean=None, running_var=None):
+        self.gamma = gamma
+        self.beta = beta
+        self.momentum = momentum
+        self.input_shape = None  # Conv层的情况下为4维，全连接层的情况下为2维
+
+        # 测试时使用的平均值和方差
+        self.running_mean = running_mean
+        self.running_var = running_var
+
+        # backward时使用的中间数据
+        self.batch_size = None
+        self.xc = None
+        self.std = None
+        self.dgamma = None
+        self.dbeta = None
+
+    def forward(self, x, train_flg=True):
+        self.input_shape = x.shape
+        if x.ndim != 2:
+            N, C, H, W = x.shape
+            x = x.reshape(N, -1)
+
+        out = self.__forward(x, train_flg)
+
+        return out.reshape(*self.input_shape)
+
+    def __forward(self, x, train_flg):
+        if self.running_mean is None:
+            N, D = x.shape
+            self.running_mean = np.zeros(D)
+            self.running_var = np.zeros(D)
+
+        if train_flg:
+            mu = x.mean(axis=0)
+            xc = x - mu
+            # var => \sigma^2
+            var = np.mean(xc ** 2, axis=0)
+            # std => \sqrt{\sigma^2 + \epsilon}
+            std = np.sqrt(var + 10e-7)
+            # xn => \hat{x_i}
+            xn = xc / std
+
+            self.batch_size = x.shape[0]
+            self.xc = xc
+            self.xn = xn
+            self.std = std
+            self.running_mean = self.momentum * self.running_mean + (1 - self.momentum) * mu
+            self.running_var = self.momentum * self.running_var + (1 - self.momentum) * var
+        else:
+            xc = x - self.running_mean
+            xn = xc / ((np.sqrt(self.running_var + 10e-7)))
+
+        out = self.gamma * xn + self.beta
+        return out
+
+    def backward(self, dout):
+        if dout.ndim != 2:
+            N, C, H, W = dout.shape
+            dout = dout.reshape(N, -1)
+
+        dx = self.__backward(dout)
+
+        dx = dx.reshape(*self.input_shape)
+        return dx
+
+    def __backward(self, dout):
+        dbeta = dout.sum(axis=0)
+
+        dgamma = np.sum(self.xn * dout, axis=0)
+
+        # dl/dx的第一部分
+        dxn = self.gamma * dout
+        dxc = dxn / self.std
+        # dl/dx的第二部分（这写法真tm邪门，直接调math.pow不就好了)
+        dstd = -np.sum((dxn * self.xc) / (self.std * self.std), axis=0)
+        dvar = 0.5 * dstd / self.std
+
+        # dl/dx的第三部分
+        dxc += (2.0 / self.batch_size) * self.xc * dvar
+        dmu = np.sum(dxc, axis=0)
+        dx = dxc - dmu / self.batch_size
+
+        self.dgamma = dgamma
+        self.dbeta = dbeta
 
         return dx

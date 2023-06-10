@@ -85,8 +85,10 @@ class MultiLayerNet:
         y = self.predict(x)
 
         weight_decay = 0
+        # 加输入层和输出层2层，即+2
         for idx in range(1, self.hidden_layer_num + 2):
             W = self.params['W' + str(idx)]
+            # 权重衰减项会在每次更新时被累加，以确保越来越多的权重被惩罚
             weight_decay += 0.5 * self.weight_decay_lambda * np.sum(W ** 2)
 
         return self.last_layer.forward(y, t) + weight_decay
