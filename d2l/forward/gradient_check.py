@@ -8,9 +8,9 @@ import time
 
 network = TwoLayerNet(input_size=784, hidden_size=50, output_size=10)
 
-# 选取前3个数据
-x_batch = x_train[:100]  # (3, 784)
-t_batch = t_train[:100]  # (3, 10)
+# 选取前100个数据
+x_batch = x_train[:100]  # (100, 784)
+t_batch = t_train[:100]  # (100, 10)
 
 gn_time_list = []
 gb_time_list = []
@@ -36,6 +36,7 @@ gb_time_list.append(end2-start2)
 
 print(np.average(gn_time_list))
 print(np.average(gb_time_list))
+
 # 上述平均值求法实例
 # a = np.array([1,2,3])
 # b = np.array([4,5,6])
