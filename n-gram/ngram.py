@@ -3,9 +3,6 @@ from torch import nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-CONTEXT_SIZE = 2  # 依据的单词数，表示我们希望由前面几个单词来预测这个单词，这里使用两个单词(trigram)
-EMBEDDING_DIM = 10  # 词向量的维度，表示词嵌入的维度
-
 # 莎士比亚的诗
 test_sentence = """When forty winters shall besiege thy brow,
 And dig deep trenches in thy beauty's field,
@@ -40,6 +37,10 @@ idx_to_word = {word_to_idx[word]: word for word in word_to_idx}  # {索引: 词�
 
 # 定义模型
 ## 模型的输入就是前面的两个词，输出就是预测单词(第三个词)的概率
+
+CONTEXT_SIZE = 2  # 依据的单词数，表示我们希望由前面几个单词来预测这个单词，这里使用两个单词(trigram)
+EMBEDDING_DIM = 10  # 词向量的维度，表示词嵌入的维度
+
 class n_gram(nn.Module):
     def __init__(self, vocab_size, context_size=CONTEXT_SIZE, n_dim=EMBEDDING_DIM):
         super(n_gram, self).__init__()
@@ -58,5 +59,55 @@ class n_gram(nn.Module):
         return out
 
 
+net = n_gram(len(word_to_idx))
+
+# 交叉熵误差
+criterion = nn.CrossEntropyLoss()
+# 随机梯度下降
+optimizer = torch.optim.SGD(net.parameters(), lr=1e-2, weight_decay=1e-5)
+
+# 迭代 100 轮
+for e in range(100):
+    train_loss = 0
+    for word, label in trigram:
+        # 将两个词作为输入, 将索引转换为张量
+        word = torch.LongTensor([word_to_idx[i] for i in word])
+        label = torch.LongTensor([word_to_idx[label]])
+        # 前向传播
+        out = net(word)
+        # 交叉熵误差
+        loss = criterion(out, label)
+        train_loss += loss.item()
+        # 反向传播
+        optimizer.zero_grad()  # 梯度归零
+        loss.backward()  # 计算梯度
+        optimizer.step()  # 更新模型参数
+    if (e + 1) % 20 == 0:
+        print('epoch: {}, Loss: {:.6f}'.format(e + 1, train_loss / len(trigram)))
+
+"""
+epoch: 20, Loss: 0.863350
+epoch: 40, Loss: 0.148631
+epoch: 60, Loss: 0.091545
+epoch: 80, Loss: 0.073185
+epoch: 100, Loss: 0.063712
+"""
+
+# 评估模型
+# 将神经网络模型设置为评估模式
+net = net.eval()
+# 随便找个数据，测试一下结果
+word, label = trigram[19]
+print('input: {}'.format(word))
+print('label: {}'.format(label))
+print()
+word = torch.LongTensor([word_to_idx[i] for i in word])
+out = net(word)
+# a = out.max(1)
+# 预测值的索引
+pred_label_idx = out.max(1).indices.item()
+# 预测的单词
+predict_word = idx_to_word[pred_label_idx]
+print('real word is "{}", predicted word is "{}"'.format(label, predict_word))
 
 
