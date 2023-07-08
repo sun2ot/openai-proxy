@@ -96,14 +96,17 @@ epoch: 100, Loss: 0.063712
 # 评估模型
 # 将神经网络模型设置为评估模式
 net = net.eval()
+
 # 随便找个数据，测试一下结果
 word, label = trigram[19]
 print('input: {}'.format(word))
 print('label: {}'.format(label))
 print()
+
 word = torch.LongTensor([word_to_idx[i] for i in word])
 out = net(word)
 # a = out.max(1)
+
 # 预测值的索引
 pred_label_idx = out.max(1).indices.item()
 # 预测的单词
