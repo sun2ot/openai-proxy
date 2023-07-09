@@ -9,6 +9,14 @@ class HiddenMarkov:
 
     # 前向算法
     def forward(self, Q, V, A, B, O, PI):
+        """
+        Q: 所有可能状态值集合
+        V: 所有可能观测值集合
+        A: 状态转移概率矩阵
+        B: 观测概率矩阵
+        O: 观测序列
+        PI: 初始概率分布向量
+        """
         # 状态序列的大小
         N = len(Q)
         # 观测序列的大小
@@ -19,70 +27,57 @@ class HiddenMarkov:
         T = M
         # 遍历每一个时刻，计算前向概率alpha值
         for t in range(T):
-            # 得到序列对应的索引
+            # 观测序列对应的索引
             indexOfO = V.index(O[t])
             # 遍历状态序列
             for i in range(N):
                 # 初始化alpha初值
                 if t == 0:
-                    # P176 公式(10.15)
+                    # 注意, 这里alpha的值是按列存的
                     alphas[i][t] = PI[t][i] * B[i][indexOfO]
-                    print('alpha1(%d) = p%db%db(o1) = %f' %
-                          (i + 1, i, i, alphas[i][t]))
+                    print('alpha_{i}({t})={p:.4f}'.format(i=i+1,t=t+1,p=alphas[i][t]))
                 else:
-                    # P176 公式(10.16)
+                    # "逐行取某一列的值"，得到矩阵的一列
                     alphas[i][t] = np.dot([alpha[t - 1] for alpha in alphas],
                                           [a[i] for a in A]) * B[i][indexOfO]
-                    print('alpha%d(%d) = [sigma alpha%d(i)ai%d]b%d(o%d) = %f' %
-                          (t + 1, i + 1, t - 1, i, i, t, alphas[i][t]))
-        # P176 公式(10.17)
-        self.forward_P = np.sum([alpha[M - 1] for alpha in alphas])
+                    print('alpha_{i}({t})={p:.4f}'.format(i=i + 1, t=t + 1, p=alphas[i][t]))
+        # T时刻，N个alpha_i(T)的值求和
+        self.forward_P = np.sum([alpha[T - 1] for alpha in alphas])
+        print('p(o|\lambda)={}'.format(self.forward_P))
         self.alphas = alphas
+
+
 
     # 后向算法
     def backward(self, Q, V, A, B, O, PI):
         # 状态序列的大小
         N = len(Q)
         # 观测序列的大小
-        M = len(O)
-        # 初始化后向概率beta值，P178 公式(10.19)
-        betas = np.ones((N, M))
-        #
+        T = len(O)
+        # 初始化后向概率beta值
+        betas = np.ones((N, T))
+        # 初始化 \beta_i(T)=1
         for i in range(N):
-            print('beta%d(%d) = 1' % (M, i + 1))
-        # 对观测序列逆向遍历
-        for t in range(M - 2, -1, -1):
+            print('beta_{i}({T})=1'.format(i=i+1, T=T))
+        # 对观测序列逆向遍历(索引为T-2到0)
+        for t in range(T - 2, -1, -1):
             # 得到序列对应的索引
             indexOfO = V.index(O[t + 1])
             # 遍历状态序列
             for i in range(N):
-                # P178 公式(10.20)
                 betas[i][t] = np.dot(
                     np.multiply(A[i], [b[indexOfO] for b in B]),
                     [beta[t + 1] for beta in betas])
-                realT = t + 1
-                realI = i + 1
-                print('beta%d(%d) = sigma[a%djbj(o%d)beta%d(j)] = (' %
-                      (realT, realI, realI, realT + 1, realT + 1),
-                      end='')
-                for j in range(N):
-                    print("%.2f * %.2f * %.2f + " %
-                          (A[i][j], B[j][indexOfO], betas[j][t + 1]),
-                          end='')
-                print("0) = %.3f" % betas[i][t])
+                print('beta_{i}({t})={r:.4f}'.format(i=i+1,t=t+1,r=betas[i][t]))
         # 取出第一个值
         indexOfO = V.index(O[0])
         self.betas = betas
-        # P178 公式(10.21)
+
         P = np.dot(np.multiply(PI, [b[indexOfO] for b in B]),
                    [beta[0] for beta in betas])
         self.backward_P = P
-        print("P(O|lambda) = ", end="")
-        for i in range(N):
-            print("%.1f * %.1f * %.5f + " %
-                  (PI[0][i], B[i][indexOfO], betas[i][0]),
-                  end="")
-        print("0 = %f" % P)
+        print("P(O|lambda) = {}".format(self.backward_P))
+
 
     # 维特比算法
     def viterbi(self, Q, V, A, B, O, PI):
@@ -141,3 +136,19 @@ class HiddenMarkov:
                   (t + 1, t + 2, t + 2, I[0][t] + 1))
         # 输出最优路径
         print('最优路径是：', "->".join([str(int(i + 1)) for i in I[0]]))
+
+
+
+# 测试
+Q = [1, 2, 3]
+V = ['红', '白']
+A = [[0.5, 0.2, 0.3], [0.3, 0.5, 0.2], [0.2, 0.3, 0.5]]
+B = [[0.5, 0.5], [0.4, 0.6], [0.7, 0.3]]
+# O = ['红', '白', '红', '红', '白', '红', '白', '白']
+O = ['红', '白', '红']    #习题10.1的例子
+PI = [[0.2, 0.4, 0.4]]
+
+HMM = HiddenMarkov()
+# HMM.forward(Q, V, A, B, O, PI)
+HMM.backward(Q, V, A, B, O, PI)
+# HMM.viterbi(Q, V, A, B, O, PI)
