@@ -66,7 +66,7 @@ class HiddenMarkov:
             # 遍历状态序列
             for i in range(N):
                 betas[i][t] = np.dot(
-                    np.multiply(A[i], [b[indexOfO] for b in B]),
+                    np.dot(A[i], [b[indexOfO] for b in B]),
                     [beta[t + 1] for beta in betas])
                 print('beta_{i}({t})={r:.4f}'.format(i=i+1,t=t+1,r=betas[i][t]))
         # 取出第一个值
@@ -149,6 +149,6 @@ O = ['红', '白', '红']    #习题10.1的例子
 PI = [[0.2, 0.4, 0.4]]
 
 HMM = HiddenMarkov()
-# HMM.forward(Q, V, A, B, O, PI)
-HMM.backward(Q, V, A, B, O, PI)
+HMM.forward(Q, V, A, B, O, PI)
+# HMM.backward(Q, V, A, B, O, PI)
 # HMM.viterbi(Q, V, A, B, O, PI)
