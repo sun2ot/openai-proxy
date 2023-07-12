@@ -14,7 +14,6 @@ def forward(A, B, PI, observation, only_r = True):
     # 递推计算前向概率
     for t in range(1, T):
         for i in range(n_state):
-            # alpha[t][i] = b[i, observation[t]] * np.sum(alpha[t - 1] * a[:, i])
             alpha[t][i] = np.dot(alpha[t-1], [a[i] for a in A]) * B[i][observation[t]]
 
     if not only_r: return alpha.tolist()
@@ -132,16 +131,31 @@ def baum_welch(observation, n_state, max_iter=100):
         a, b, p = new_a, new_b, new_p
     return a, b, p
 
-sequence = [0, 1, 1, 0, 0, 1]
+observation = [0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1,
+                1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0,
+                0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
+                1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,
+                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0,
+                0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]
 
 A = [[0.0, 1.0, 0.0, 0.0], [0.4, 0.0, 0.6, 0.0], [0.0, 0.4, 0.0, 0.6], [0.0, 0.0, 0.5, 0.5]]
 B = [[0.5, 0.5], [0.3, 0.7], [0.6, 0.4], [0.8, 0.2]]
 PI = [0.25, 0.25, 0.25, 0.25]
 
 
-alpha = forward(A, B, PI, sequence)
+# for i in range(10):
+#     max_iter = 100 + i*100
+#     if i == 0:
+#         alpha = forward(A, B, PI, observation)
+#         print("初始模型参数:", alpha)
+#     else:
+#         new_A, new_B, new_PI = baum_welch(observation, 4, max_iter)
+#         alpha = forward(new_A, new_B, new_PI, observation)
+#         print("BN算法训练后:", alpha)
+
+alpha = forward(A, B, PI, observation)
 print("初始模型参数:", alpha)
 
-A1,B1,P1 = baum_welch(sequence, 4, max_iter=1000)
-alpha2 = forward(A1, B1, P1, sequence)
+A1,B1,P1 = baum_welch(observation, 4, max_iter=1000)
+alpha2 = forward(A1, B1, P1, observation)
 print("BN算法训练后:", alpha2)
