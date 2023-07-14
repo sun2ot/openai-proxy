@@ -1,9 +1,6 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 
-# 莎士比亚的诗
 test_sentence = """When forty winters shall besiege thy brow,
 And dig deep trenches in thy beauty's field,
 Thy youth's proud livery so gazed on now,
