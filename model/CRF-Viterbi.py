@@ -60,34 +60,26 @@ if __name__ == "__main__":
     def t1(y0, y1, x, i):
         return int(y0 == 0 and y1 == 1 and i in {1, 2})
 
-
     def t2(y0, y1, x, i):
         return int(y0 == 0 and y1 == 0 and i in {1})
-
 
     def t3(y0, y1, x, i):
         return int(y0 == 1 and y1 == 0 and i in {2})
 
-
     def t4(y0, y1, x, i):
         return int(y0 == 1 and y1 == 0 and i in {1})
-
 
     def t5(y0, y1, x, i):
         return int(y0 == 1 and y1 == 1 and i in {2})
 
-
     def s1(y0, x, i):
         return int(y0 == 0 and i in {0})
-
 
     def s2(y0, x, i):
         return int(y0 == 1 and i in {0, 1})
 
-
     def s3(y0, x, i):
         return int(y0 == 0 and i in {1, 2})
-
 
     def s4(y0, x, i):
         return int(y0 == 1 and i in {2})
@@ -97,4 +89,4 @@ if __name__ == "__main__":
     w2 = [1, 0.5, 0.8, 0.5]
     s = [s1, s2, s3, s4]
 
-    print('最优路径为：', viterbi_algorithm(w1, t, w2, s, [1,2,1], 2))  # [0, 1, 0]
+    print(viterbi_algorithm(w1, t, w2, s, [random.randint(0, 1) for _ in range(3)], 2))
