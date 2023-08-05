@@ -63,7 +63,7 @@ class MyGMM():
 if __name__ == "__main__":
     import pandas as pd
     import os
-    import matplotlib.pyplot as plt
+
     # 获取当前文件所在的目录路径
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # 构建完整的文件路径
