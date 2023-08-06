@@ -1,13 +1,7 @@
-from typing import Set, Any
-
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 from queue import Queue
-
-# 固定一个随机序列
-random.seed(1)
-
 
 class DBSCAN:
     def __init__(self, epsilon=0.11, min_pts=5):
@@ -45,10 +39,11 @@ class DBSCAN:
         _Gamma = set(range(X.shape[0]))
 
         while len(self.Omega) > 0:
-            # 记录当前未访问样本集合
+            # 创建当前未访问样本集合副本
             old_Gamma = set(_Gamma)
             # 随机选取一个核心对象
             # todo: omega转为list是否必须？
+            # re: 必须。python 3.9后已弃用从 set() 中取样的方法，必须为 sequence 类型
             o = random.sample(list(self.Omega), 1)[0]
             # 初始化队列 Q
             Q = Queue()
@@ -80,63 +75,50 @@ class DBSCAN:
 
 if __name__ == "__main__":
     import pandas as pd
+    import os
 
-    data = pd.read_csv("wl4.csv", header=None)
-    Y = data.values
-    X = np.array(
-        [
-            [0.697, 0.460],
-            [0.774, 0.376],
-            [0.634, 0.264],
-            [0.608, 0.318],
-            [0.556, 0.215],
-            [0.403, 0.237],
-            [0.481, 0.149],
-            [0.437, 0.211],
-            [0.666, 0.091],
-            [0.243, 0.267],
-            [0.245, 0.057],
-            [0.343, 0.099],
-            [0.639, 0.161],
-            [0.657, 0.198],
-            [0.360, 0.370],
-            [0.593, 0.042],
-            [0.719, 0.103],
-            [0.359, 0.188],
-            [0.339, 0.241],
-            [0.282, 0.257],
-            [0.748, 0.232],
-            [0.714, 0.346],
-            [0.483, 0.312],
-            [0.478, 0.437],
-            [0.525, 0.369],
-            [0.751, 0.489],
-            [0.532, 0.472],
-            [0.473, 0.376],
-            [0.725, 0.445],
-            [0.446, 0.459],
-        ]
-    )
+    # 读取西瓜数据集4.0
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, "../data/watermelon4.csv")
+    data = pd.read_csv(file_path, header=None)
+    X = data.values
 
     dbscan = DBSCAN()
     dbscan.fit(X)
     print("C:\n", dbscan.C)
     print("labels:\n", dbscan.labels)
+
+    plt.subplots(1, 2, figsize=(12, 6))
+
+    plt.subplot(121)
     plt.scatter(X[:, 0], X[:, 1], c=dbscan.labels)
-    plt.xlim(0.1, 0.9)  # 设置x轴范围为0到0.9
-    plt.ylim(0, 0.8)  # 设置y轴范围为0到0.9
-    plt.xticks([i / 10 for i in range(1, 10)])  # 设置x轴刻度分割点为0.0, 0.1, 0.2, ..., 0.9
-    plt.yticks([i / 10 for i in range(9)])  # 设置y轴刻度分割点为0.0, 0.1, 0.2, ..., 0.9
-    # plt.figure(12)
-    # plt.subplot(121)
+    # 坐标轴范围
+    plt.xlim(0.1, 0.9)
+    plt.ylim(0, 0.8)
+    # 坐标轴刻度
+    plt.xticks([i / 10 for i in range(1, 10)])
+    plt.yticks([i / 10 for i in range(9)])
+    # 坐标轴名称
+    plt.xlabel("density")
+    plt.ylabel("sugar content")
+    # 图片标题
+    plt.title("DBSCAN")
 
-    plt.title("tinyml")
+    import sklearn.cluster as cluster
 
-    # import sklearn.cluster as cluster
-    # sklearn_DBSCAN=cluster.DBSCAN(eps=0.11,min_samples=5,metric='l2')
-    # sklearn_DBSCAN.fit(X)
-    # print(sklearn_DBSCAN.labels_)
-    # plt.subplot(122)
-    # plt.scatter(X[:,0],X[:,1],c=sklearn_DBSCAN.labels_)
-    # plt.title('sklearn')
+    sklearn_DBSCAN = cluster.DBSCAN(eps=0.11, min_samples=5, metric="l2")
+    sklearn_DBSCAN.fit(X)
+    print("sklearn-labels:\n", sklearn_DBSCAN.labels_)
+
+    plt.subplot(122)
+    plt.scatter(X[:, 0], X[:, 1], c=sklearn_DBSCAN.labels_)
+    # 与第一个子图保持一致
+    plt.xlim(0.1, 0.9)
+    plt.ylim(0, 0.8)
+    plt.xticks([i / 10 for i in range(1, 10)])
+    plt.yticks([i / 10 for i in range(9)])
+    plt.xlabel("density")
+    plt.ylabel("sugar content")
+    plt.title("sklearn-DBSCAN")
+
     plt.show()
