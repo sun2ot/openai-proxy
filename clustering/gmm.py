@@ -3,17 +3,16 @@ import matplotlib.pyplot as plt
 
 
 def multiGaussian(x, mu, sigma):
-    # return (
-    #     1
-    #     / ((2 * np.pi) * pow(np.linalg.det(sigma), 0.5))
-    #     * np.exp(-0.5 * (x - mu).dot(np.linalg.pinv(sigma)).dot((x - mu).T))
-    # )
     return (
         1
         / ((2 * np.pi) * pow(np.linalg.det(sigma), 0.5))
-        * np.exp(-0.5 * (x - mu).T.dot(np.linalg.pinv(sigma)).dot((x - mu)))
+        * np.exp(-0.5 * (x - mu).dot(np.linalg.pinv(sigma)).dot((x - mu).T))
     )
-    # todo: x-u的转置和x-u换个位置试试
+    # return (
+    #     1
+    #     / ((2 * np.pi) * pow(np.linalg.det(sigma), 0.5))
+    #     * np.exp(-0.5 * (x - mu).T.dot(np.linalg.pinv(sigma)).dot((x - mu)))
+    # )
 
 
 def computeGamma(X, mu, sigma, alpha, multiGaussian):
@@ -23,9 +22,9 @@ def computeGamma(X, mu, sigma, alpha, multiGaussian):
     n_clusters = len(alpha)
     # 初始化 gamma 矩阵
     gamma = np.zeros((n_samples, n_clusters))
-
+    # 初始化概率密度函数
     p = np.zeros(n_clusters)
-
+    # 初始化高斯混合分布
     g = np.zeros(n_clusters)
 
     for j in range(n_samples):
@@ -57,8 +56,8 @@ class MyGMM:
         # 初始化高斯混合分布的模型参数
         alpha = np.ones(self.n_clusters) / self.n_clusters
         # 为复现西瓜书效果，指定三个样本作为mu
-        mu = np.array([[0.403, 0.237], [0.714, 0.346], [0.532, 0.472]])
-        # mu=data[np.random.choice(range(n_samples), self.n_clusters)]
+        # mu = np.array([[0.403, 0.237], [0.714, 0.346], [0.532, 0.472]])
+        mu = data[np.random.choice(range(n_samples), self.n_clusters)]
         # 协方差矩阵初始化为 0.1 的对角阵
         sigma = np.full(
             (self.n_clusters, n_features, n_features), np.diag(np.full(n_features, 0.1))
@@ -93,6 +92,9 @@ if __name__ == "__main__":
     import pandas as pd
     import os
 
+    # UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads.
+    os.environ["OMP_NUM_THREADS"] = "1"
+
     # 获取当前文件所在的目录路径
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # 构建完整的文件路径
@@ -104,6 +106,9 @@ if __name__ == "__main__":
     GMM.fit(data)
     result = GMM.predict(data)
 
+    plt.subplots(1, 2, figsize=(12, 6))
+
+    plt.subplot(121)
     # 样本点
     plt.scatter(data[:, 0], data[:, 1], c=result)
     # 均值向量
@@ -119,4 +124,24 @@ if __name__ == "__main__":
     plt.ylabel("sugar content")
     # 图片标题
     plt.title("GMM")
+
+    from sklearn.mixture import GaussianMixture
+
+    sklearn_gmm = GaussianMixture(
+        n_components=3, covariance_type="full", max_iter=50
+    ).fit(data)
+    labels = sklearn_gmm.predict(data)
+    print(labels)
+
+    plt.subplot(122)
+    plt.scatter(data[:, 0], data[:, 1], c=labels)
+    # 与第一个子图保持一致
+    plt.xlim(0.1, 0.9)
+    plt.ylim(0, 0.8)
+    plt.xticks([i / 10 for i in range(1, 10)])
+    plt.yticks([i / 10 for i in range(9)])
+    plt.xlabel("density")
+    plt.ylabel("sugar content")
+    plt.title("sklearn-GMM")
+
     plt.show()
