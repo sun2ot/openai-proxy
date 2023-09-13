@@ -5,14 +5,9 @@ import matplotlib.pyplot as plt
 def multiGaussian(x, mu, sigma):
     return (
         1
-        / ((2 * np.pi) * pow(np.linalg.det(sigma), 0.5))
-        * np.exp(-0.5 * (x - mu).dot(np.linalg.pinv(sigma)).dot((x - mu).T))
+        / (pow(2 * np.pi, mu.shape[0] / 2) * pow(np.linalg.det(sigma), 0.5))
+        * np.exp(-0.5 * (x - mu).T.dot(np.linalg.pinv(sigma)).dot(x - mu))
     )
-    # return (
-    #     1
-    #     / ((2 * np.pi) * pow(np.linalg.det(sigma), 0.5))
-    #     * np.exp(-0.5 * (x - mu).T.dot(np.linalg.pinv(sigma)).dot((x - mu)))
-    # )
 
 
 def computeGamma(X, mu, sigma, alpha, multiGaussian):
@@ -39,7 +34,7 @@ def computeGamma(X, mu, sigma, alpha, multiGaussian):
 
 
 class MyGMM:
-    def __init__(self, n_clusters, ITER=50):
+    def __init__(self, n_clusters, ITER=100):
         """
         :param n_clusters: 高斯混合成分个数
         """
@@ -55,7 +50,6 @@ class MyGMM:
 
         # 初始化高斯混合分布的模型参数
         alpha = np.ones(self.n_clusters) / self.n_clusters
-        # 为复现西瓜书效果，指定三个样本作为mu
         # mu = np.array([[0.403, 0.237], [0.714, 0.346], [0.532, 0.472]])
         mu = data[np.random.choice(range(n_samples), self.n_clusters)]
         # 协方差矩阵初始化为 0.1 的对角阵
@@ -92,7 +86,6 @@ if __name__ == "__main__":
     import pandas as pd
     import os
 
-    # UserWarning: KMeans is known to have a memory leak on Windows with MKL, when there are less chunks than available threads.
     os.environ["OMP_NUM_THREADS"] = "1"
 
     # 获取当前文件所在的目录路径

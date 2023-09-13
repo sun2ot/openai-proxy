@@ -20,7 +20,6 @@ class AGNES:
         elif dist_type == "hausdorff":
             self.dist_func = directed_hausdorff
 
-    # p215 图9.11 AGNES算法
     def fit(self, X):
         # 初始化单样本聚类簇
         for j in range(X.shape[0]):
@@ -135,8 +134,6 @@ if __name__ == "__main__":
     agnes.fit(X)
     print("C:", agnes.C)
     print(agnes.labels_)
-    # plt.figure(12)
-    # plt.subplot(121)
     # 坐标轴范围
     plt.xlim(0.1, 0.9)
     plt.ylim(0, 0.8)
@@ -149,11 +146,4 @@ if __name__ == "__main__":
     plt.scatter(X[:, 0], X[:, 1], c=agnes.labels_)
     plt.title("agens")
 
-    # from sklearn.cluster.hierarchical import AgglomerativeClustering
-    # sklearn_agnes=AgglomerativeClustering(n_clusters=7,affinity='l2',linkage='average')
-    # sklearn_agnes.fit(X)
-    # print(sklearn_agnes.labels_)
-    # plt.subplot(122)
-    # plt.scatter(X[:,0],X[:,1],c=sklearn_agnes.labels_)
-    # plt.title('sklearn')
     plt.show()

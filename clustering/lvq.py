@@ -11,7 +11,6 @@ class LVQ:
         self.t = t
         # p[i]表示第i个原型向量的值
         self.p = None
-        self.c = len(np.unique(t))
         # 原型向量个数
         self.q = len(t)
         # 学习率
@@ -20,7 +19,6 @@ class LVQ:
         self.C = None
         self.labels_ = None
 
-    # p205 图9.4 学习向量量化算法
     def fit(self, X, y):
         C = {}
         for i in range(self.q):
@@ -32,11 +30,7 @@ class LVQ:
             candidate_indices = np.where(y == self.t[i])[0]
             target_indice = random.sample(list(candidate_indices), 1)
             self.p[i] = X[target_indice]
-        """
-        # 书上p的选取
-        indices=[4,11,17,22,28]
-        self.p=X[indices]
-        """
+
         for _ in range(self.max_iter):
             # 随机选取样本
             j = random.sample(list(range(len(y))), 1)
@@ -44,7 +38,6 @@ class LVQ:
             d = np.sqrt(np.sum((X[j] - self.p) ** 2, axis=1))
             # 与样本最近的原型向量
             i_ = np.argmin(d)
-            old_p = self.p
             if y[j] == t[i_]:
                 self.p[i_] = self.p[i_] + self.eta * (X[j] - self.p[i_])
             else:
@@ -80,6 +73,7 @@ if __name__ == "__main__":
     X = data.values
     y = np.zeros((X.shape[0],), dtype=np.int32)
     y[range(9, 21)] = 1
+    # 各原型向量的预设类别标记
     t = np.array([0, 1, 1, 0, 0], dtype=np.int32)
 
     print(y)
@@ -89,7 +83,16 @@ if __name__ == "__main__":
     print(lvq.C)
     print(lvq.labels_)
     print(lvq.predict(X))
+    # 坐标轴范围
+    plt.xlim(0.1, 0.9)
+    plt.ylim(0, 0.8)
+    # 坐标轴刻度
+    plt.xticks([i / 10 for i in range(1, 10)])
+    plt.yticks([i / 10 for i in range(9)])
+    # 坐标轴名称
+    plt.xlabel("density")
+    plt.ylabel("sugar content")
     plt.scatter(X[:, 0], X[:, 1], c=lvq.labels_)
-    plt.scatter(lvq.p[:, 0], lvq.p[:, 1], c=range(len(lvq.p)), marker="+")
-    plt.title("tinyml")
+    plt.scatter(lvq.p[:, 0], lvq.p[:, 1], c="red", marker="+")
+    plt.title("lvq")
     plt.show()

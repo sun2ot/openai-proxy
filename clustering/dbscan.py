@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 from queue import Queue
 
+
 class DBSCAN:
     def __init__(self, epsilon=0.11, min_pts=5):
         """
@@ -16,7 +17,6 @@ class DBSCAN:
         self.Omega = set()  # 核心对象集合
         self.N_epsilon = {}  # epsilon 邻域集合
 
-    # p213 图9.9 DBSCAN算法
     def fit(self, X):
         """
         :param X: 样本集

@@ -36,7 +36,6 @@ class KMeans:
         else:
             raise NotImplementedError
 
-    # p203图9.2算法流程
     def fit(self, X):
         self.init(X, "kmeans++")
         while True:
@@ -49,7 +48,7 @@ class KMeans:
                 # 簇标记
                 lambda_j = np.argmin(d)
                 # 将样本划入相应的簇
-                C[lambda_j].append(j)
+                C[int(lambda_j)].append(j)
             mu_ = np.zeros((self.k, X.shape[1]))
             for i in range(self.k):
                 # 更新均值向量
